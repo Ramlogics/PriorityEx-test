@@ -7,6 +7,7 @@ var FromAddress = '';
 var PrivateKey = '';
 var NoToken = '';
 var NoEther = '';
+var hash = '';
 
 //This module standard library for Ethereum Network.
 const Web3 = require("web3");
@@ -33,6 +34,7 @@ app.get('/', function (req, res) {
     PrivateKey = req.query.PrivateKey;
     NoToken = req.query.NoToken;
     NoEther = req.query.NoEther;
+    hash = req.query.hash;
 
     switch (task_code) {
         case 'Create': Create(res); break;
@@ -40,6 +42,7 @@ app.get('/', function (req, res) {
         case 'getToken': getToken(res,ToAddress); break;
         case 'TokenTransfer': TokenTransfer(res,ToAddress,NoToken,FromAddress,PrivateKey); break;
         case 'EtherTransfer': EtherTransfer(res,ToAddress,NoEther,FromAddress,PrivateKey); break;
+        case 'confirm': confirm(res,hash); break;
 
         default:
             res.contentType('application/json');
@@ -47,7 +50,23 @@ app.get('/', function (req, res) {
     }
 
 });
+// Get status of a transaction by hash
+function confirm(res,hash){
+    var account = web3.eth.getTransactionReceipt(hash);
+    var status = '';
+    if (account) {
+        if (account.status=='0x1') {
+            status = "Done";
+        }else{
+            status = "Not";
+        }
+    }else{
+        status = "Panding";
+    }
 
+    res.contentType('application/json');
+    res.end(JSON.stringify(status));
+}
 //Create a acount and return address and private-key.
 function Create(res){
     //var account = new Web3EthAccounts('http://ropsten.infura.io/t2utzUdkSyp5DgSxasQX');
