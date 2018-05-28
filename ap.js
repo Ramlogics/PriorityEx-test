@@ -122,9 +122,8 @@ function TokenTransfer(res,ToAddress,NoToken,FromAddress,PrivateKey){
 function EtherTransfer(res,ToAddress,NoEther,FromAddress,PrivateKey){
     web3.eth.defaultAccount = FromAddress;
     var count = web3.eth.getTransactionCount(web3.eth.defaultAccount);
-    var data = contract.transfer.getData(ToAddress, NoEther);
     var gasPrice = web3.eth.gasPrice;
-    var gasLimit = 300000;
+    var gasLimit = 21000;
 
     var rawTransaction = {
         "from": FromAddress,
@@ -133,7 +132,6 @@ function EtherTransfer(res,ToAddress,NoEther,FromAddress,PrivateKey){
         "gasLimit": web3.toHex(gasLimit),
         "to": ToAddress,
         "value": web3.toHex(NoEther),
-        "data": data,
     };
 
     var privKey = new Buffer(PrivateKey, 'hex');
