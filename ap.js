@@ -43,6 +43,7 @@ app.get('/', function (req, res) {
         case 'TokenTransfer': TokenTransfer(res,ToAddress,NoToken,FromAddress,PrivateKey); break;
         case 'EtherTransfer': EtherTransfer(res,ToAddress,NoEther,FromAddress,PrivateKey); break;
         case 'confirm': confirm(res,hash); break;
+        case 'AllEtherTransfer': AllEtherTransfer(res,ToAddress,FromAddress,PrivateKey); break;
 
         default:
             res.contentType('application/json');
@@ -144,6 +145,41 @@ function EtherTransfer(res,ToAddress,NoEther,FromAddress,PrivateKey){
         if (!err){
             res.contentType('application/json');
             res.end(JSON.stringify(hash));
+        }
+    });
+}
+
+//Transfer all ether form "FromAddress" to "ToAddress" .
+function AllEtherTransfer(res,ToAddress,FromAddress,PrivateKey){
+
+    web3.eth.defaultAccount = FromAddress;
+    var count = web3.eth.getTransactionCount(web3.eth.defaultAccount);
+    var gasPrice = web3.eth.gasPrice;
+    var gasLimit = 21000;
+    var balance = web3.eth.getBalance(FromAddress);
+    var fee = gasPrice.mul(gasLimit);
+    var NoEther = balance.sub(fee);
+    var rawTransaction = {
+        "from": FromAddress,
+        "nonce": web3.toHex(count),
+        "gasPrice": web3.toHex(gasPrice),
+        "gasLimit": web3.toHex(gasLimit),
+        "to": ToAddress,
+        "value": web3.toHex(NoEther),
+    };
+
+    var privKey = new Buffer(PrivateKey, 'hex');
+    var tx = new Tx(rawTransaction);
+
+    tx.sign(privKey);
+    var serializedTx = tx.serialize();
+    web3.eth.sendRawTransaction('0x' + serializedTx.toString('hex'), function(err, hash) {
+        if (!err){
+            res.contentType('application/json');
+            res.end(JSON.stringify(hash));
+        }else{
+            res.contentType('application/json');
+            res.end();
         }
     });
 }
